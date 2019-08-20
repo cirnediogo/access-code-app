@@ -1,0 +1,43 @@
+.Auth {
+    width: 400px;
+    height: auto;
+    margin: 100px auto 0 auto;
+    padding: 20px;
+}
+
+.Auth * {
+    font-family: 'Comfortaa', cursive;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.Auth h1 {
+    margin: auto;
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.Auth p {
+    font-weight: 400;
+    text-align: center;
+}
+
+.Auth p.soft {
+    font-weight: 300;
+    color: gray;
+}
+
+.Auth form {
+    margin-top: 30px;
+}
+
+@media (max-width: 419px) {
+    .Auth {
+        width: 100%;
+        padding: 10px;
+        -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+        -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+        box-sizing: border-box;         /* Opera/IE 8+ */
+    }
+}
