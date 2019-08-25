@@ -1,15 +1,14 @@
 import React from 'react';
 import { Link } from "react-router-dom";
-
 import Input from 'muicss/lib/react/input';
 import Button from 'muicss/lib/react/button';
 
-import './Auth.css';
+import '../../styles/layout.css';
 
 const auth = (props) => {
 
     return (
-        <div className='Auth'>
+        <div className='container'>
             <div >
                 <h1>Bem-vindo</h1>
                 <p>Utilize o seu código de acesso para entrar.</p>
