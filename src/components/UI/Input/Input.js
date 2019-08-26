@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import BaseInput from 'muicss/lib/react/input';
 
-import { cpfMask } from './cpfMask'
+import { cpfMask } from './cpfMask';
 
 class Input extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { value: '', placeholder: '' };
+        this.state = { value: this.props.value, placeholder: '' };
         this.handleChange = this.handleChange.bind(this);
         this.handleFocus = this.handleFocus.bind(this);
         this.handleBlur = this.handleBlur.bind(this);
@@ -23,6 +23,7 @@ class Input extends Component {
                 value = event.target.value;
         }
         this.setState({ value: value })
+        this.props.onChange(this.props.name, value);
     }
 
     handleFocus() {
@@ -38,9 +39,6 @@ class Input extends Component {
     }
 
     handleBlur(event) {
-        console.log(event.target);
-        console.log('TYPE: ' + event.target.type);
-        console.log('invalid: ' + event.target.invalid);
         this.setState({ placeholder: '' })
     }
 
