@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { Link } from "react-router-dom";
 import Button from 'muicss/lib/react/button';
 
-import Input from '../../components/UI/Input/Input'
-import { getAccessCode } from './AccessCode'
+import Input from '../../components/UI/Input/Input';
+import { getAccessCode } from './AccessCode';
+import axios from '../../axios';
 
 import '../../styles/layout.css';
 
@@ -13,16 +14,87 @@ class Register extends Component {
         name: '',
         cpf: '',
         email: '',
-        code: ''
+        loading: false,
+        registered: false,
+        error: ''
+    }
+
+    componentWillMount() {
+        this.requestInterceptor = axios.interceptors.request.use(req => {
+            this.setState({
+                error: ''
+            });
+            return req;
+        });
+    }
+
+    componentWillUnmount() {
+        axios.interceptors.request.eject(this.requestInterceptor);
+        axios.interceptors.response.eject(this.responseInterceptor);
+    }
+
+    checkUserParams = (callback, errorCallback) => {
+        axios.get('/accounts.json?orderBy="cpf"&equalTo="' + this.state.cpf + '"')
+            .then(res => {
+                if (Object.keys(res.data).length > 0) {
+                    this.setState({
+                        error: 'Este CPF já está cadastrado.',
+                        loading: false
+                    })
+                } else {
+                    axios.get('/accounts.json?orderBy="email"&equalTo="' + this.state.email + '"')
+                        .then(res2 => {
+                            if (Object.keys(res2.data).length > 0) {
+                                this.setState({
+                                    error: 'Este e-mail já está cadastrado.',
+                                    loading: false
+                                })
+                            } else {
+                                callback();
+                            }
+                        })
+                        .catch(err => { this.requestError(err) })
+                }
+            })
+            .catch(err => { this.requestError(err) })
     }
 
     registerHandler = (event) => {
         event.preventDefault();
-        const accessCode = getAccessCode(this.state.cpf);
-        console.log(accessCode);
         this.setState({
-            code: accessCode
+            loading: true
         })
+        this.checkUserParams(() => {
+            const accessCode = getAccessCode(this.state.cpf);
+            const user = {
+                name: this.state.name,
+                cpf: this.state.cpf,
+                email: this.state.email,
+                accesscode: accessCode
+            }
+            axios.post('/accounts.json', user)
+                .then(res => {
+                    this.setState({
+                        registered: true,
+                        loading: false
+                    })
+                })
+                .catch(err => { this.requestError(err) })
+        })
+    }
+
+    requestError(err) {
+        if (err.message) {
+            this.setState({
+                error: err.message,
+                loading: false
+            })
+        } else {
+            this.setState({
+                error: 'Erro desconhecido.',
+                loading: false
+            })
+        }
     }
 
     onInputChange = (object, value) => {
@@ -32,8 +104,22 @@ class Register extends Component {
     }
 
     render() {
-        return (
-            <div className='container'>
+        let content;
+        if (!this.state.registered && !this.state.error) {
+            let footerContent = <div className="loader">Loading...</div>;
+            if (!this.state.loading) {
+                footerContent = (
+                    <div>
+                        <p>
+                            Já possui um código de acesso?
+                        </p>
+                        <Link to="/auth">
+                            <Button variant="flat" color="primary">Entrar</Button>
+                        </Link>
+                    </div>
+                )
+            }
+            content = (
                 <div >
                     <h1>Bem-vindo</h1>
                     <p>Cadastre-se para receber um código de acesso.</p>
@@ -64,13 +150,50 @@ class Register extends Component {
                         </p>
                         <Button variant="raised" color="primary">Cadastrar</Button>
                     </form>
-                    <p>
-                        Já possui um código de acesso?
-                    </p>
-                    <Link to="/auth">
-                        <Button variant="flat" color="primary">Entrar</Button>
-                    </Link>
+                    {footerContent}
+                    {content}
                 </div>
+            )
+        } else if (this.state.registered) {
+            content = (
+                <div >
+                    <p>Cadastro efetuado com sucesso.</p>
+                    <p>O seu código de acesso foi enviado para o e-mail cadastrado.</p>
+                    <p className='soft'>
+                        O código de acesso é pessoal e intransferível.
+                        Não deixe que outras pessoas tenham acesso a ele.
+                    </p>
+                    <div>
+                        <p>
+                            Voltar para a página inicial?
+                        </p>
+                        <Link to="/auth">
+                            <Button variant="flat" color="primary">Voltar</Button>
+                        </Link>
+                    </div>
+                </div>
+            );
+        } else {
+            content = (
+                <div>
+                    <p>Erro ao efetuar o cadastro.</p>
+                    <p className='error'>{this.state.error}</p>
+                    <p>Se necessário, entre em contato para solucionar o problema.</p>
+                    <div>
+                        <p>
+                            Voltar para a página inicial?
+                        </p>
+                        <Link to="/auth">
+                            <Button variant="flat" color="primary">Voltar</Button>
+                        </Link>
+                    </div>
+                </div>
+            )
+        }
+
+        return (
+            <div className='container'>
+                {content}
             </div>
         )
     }
