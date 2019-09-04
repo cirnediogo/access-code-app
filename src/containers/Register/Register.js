@@ -16,7 +16,8 @@ class Register extends Component {
         email: '',
         loading: false,
         registered: false,
-        error: ''
+        error: '',
+        info: null
     }
 
     componentWillMount() {
@@ -33,22 +34,16 @@ class Register extends Component {
         axios.interceptors.response.eject(this.responseInterceptor);
     }
 
-    checkUserParams = (callback, errorCallback) => {
+    checkUserParams = (callback) => {
         axios.get('/accounts.json?orderBy="cpf"&equalTo="' + this.state.cpf + '"')
             .then(res => {
                 if (Object.keys(res.data).length > 0) {
-                    this.setState({
-                        error: 'Este CPF já está cadastrado.',
-                        loading: false
-                    })
+                    this.requestError( {message: 'Este CPF já está cadastrado.' } )
                 } else {
                     axios.get('/accounts.json?orderBy="email"&equalTo="' + this.state.email + '"')
                         .then(res2 => {
                             if (Object.keys(res2.data).length > 0) {
-                                this.setState({
-                                    error: 'Este e-mail já está cadastrado.',
-                                    loading: false
-                                })
+                                this.requestError( {message: 'Este e-mail já está cadastrado.' } )
                             } else {
                                 callback();
                             }
@@ -65,36 +60,58 @@ class Register extends Component {
             loading: true
         })
         this.checkUserParams(() => {
-            const accessCode = getAccessCode(this.state.cpf);
-            const user = {
-                name: this.state.name,
-                cpf: this.state.cpf,
-                email: this.state.email,
-                accesscode: accessCode
-            }
-            axios.post('/accounts.json', user)
-                .then(res => {
-                    this.setState({
-                        registered: true,
-                        loading: false
+            this.generateAccessCode(0, (accessCode) => {
+                const user = {
+                    name: this.state.name,
+                    cpf: this.state.cpf,
+                    email: this.state.email,
+                    accesscode: accessCode
+                }
+                axios.post('/accounts.json', user)
+                    .then(res => {
+                        this.setState({
+                            registered: true,
+                            loading: false
+                        })
                     })
-                })
-                .catch(err => { this.requestError(err) })
+                    .catch(err => { this.requestError(err) })
+            })
         })
     }
 
-    requestError(err) {
-        if (err.message) {
-            this.setState({
-                error: err.message,
-                loading: false
+    generateAccessCode = (shift, callback) => {
+        const accessCode = getAccessCode(shift, this.state.cpf);
+        axios.get('/accounts.json?orderBy="accesscode"&equalTo="' + accessCode + '"')
+            .then(res => {
+                if (Object.keys(res.data).length > 0) {
+                    this.generateAccessCode(++shift, callback);
+                } else {
+                    callback(accessCode);
+                }
             })
-        } else {
-            this.setState({
-                error: 'Erro desconhecido.',
-                loading: false
-            })
+            .catch(err => { this.requestError(err) })
+    }
+
+    requestError(error) {
+        let errorMessage = 'Erro desconhecido.';
+        if (error.message) {
+            errorMessage = error.message;
         }
+        axios.get('/info.json')
+            .then(res => {
+                this.setState({
+                    info: res.data,
+                    error: errorMessage,
+                    loading: false
+                })
+            })
+            .catch(err => {
+                this.setState({
+                    info: null,
+                    error: errorMessage,
+                    loading: false
+                })
+            })
     }
 
     onInputChange = (object, value) => {
@@ -174,11 +191,22 @@ class Register extends Component {
                 </div>
             );
         } else {
+            let contact = "Se necessário entre em contato para solucionar o problema";
+            if (this.state.info && this.state.info.phone) {
+                contact += " por meio do número " + this.state.info.phone;
+                if (this.state.info.email) {
+                    contact += " ou";
+                }
+            }
+            if (this.state.info && this.state.info.email) {
+                contact += " pelo e-mail " + this.state.info.email;
+            }
+            contact += ".";
             content = (
                 <div>
                     <p>Erro ao efetuar o cadastro.</p>
                     <p className='error'>{this.state.error}</p>
-                    <p>Se necessário, entre em contato para solucionar o problema.</p>
+                    <p>{contact}</p>
                     <div>
                         <p>
                             Voltar para a página inicial?
