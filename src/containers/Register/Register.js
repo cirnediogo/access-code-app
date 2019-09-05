@@ -29,6 +29,16 @@ class Register extends Component {
         });
     }
 
+    componentDidMount() {
+        axios.get('/info.json')
+            .then(res => {
+                this.setState({
+                    info: res.data,
+                })
+            })
+            .catch(err => { })
+    }
+
     componentWillUnmount() {
         axios.interceptors.request.eject(this.requestInterceptor);
         axios.interceptors.response.eject(this.responseInterceptor);
@@ -38,12 +48,12 @@ class Register extends Component {
         axios.get('/accounts.json?orderBy="cpf"&equalTo="' + this.state.cpf + '"')
             .then(res => {
                 if (Object.keys(res.data).length > 0) {
-                    this.requestError( {message: 'Este CPF já está cadastrado.' } )
+                    this.requestError({ message: 'Este CPF já está cadastrado.' })
                 } else {
                     axios.get('/accounts.json?orderBy="email"&equalTo="' + this.state.email + '"')
                         .then(res2 => {
                             if (Object.keys(res2.data).length > 0) {
-                                this.requestError( {message: 'Este e-mail já está cadastrado.' } )
+                                this.requestError({ message: 'Este e-mail já está cadastrado.' })
                             } else {
                                 callback();
                             }
@@ -68,7 +78,8 @@ class Register extends Component {
                     accesscode: accessCode
                 }
                 axios.post('/accounts.json', user)
-                    .then(res => {
+                    .then(() => {
+                        this.sendMail();
                         this.setState({
                             registered: true,
                             loading: false
@@ -92,26 +103,27 @@ class Register extends Component {
             .catch(err => { this.requestError(err) })
     }
 
+    sendMail() {
+        const data = {
+            assunto: 'Cadastro efetuado com sucesso.',
+            destinatarios: this.state.email,
+            corpo: 'Este é um testeeee.',
+            corpoHtml: '<h1>Este é um teste</h1>'
+        }
+        axios.post('https://us-central1-access-code-app.cloudfunctions.net/sendMail', data)
+            .then(() => {})
+            .catch(() => {})
+    }
+
     requestError(error) {
         let errorMessage = 'Erro desconhecido.';
         if (error.message) {
             errorMessage = error.message;
         }
-        axios.get('/info.json')
-            .then(res => {
-                this.setState({
-                    info: res.data,
-                    error: errorMessage,
-                    loading: false
-                })
-            })
-            .catch(err => {
-                this.setState({
-                    info: null,
-                    error: errorMessage,
-                    loading: false
-                })
-            })
+        this.setState({
+            error: errorMessage,
+            loading: false
+        })
     }
 
     onInputChange = (object, value) => {
@@ -172,13 +184,27 @@ class Register extends Component {
                 </div>
             )
         } else if (this.state.registered) {
+            let contact = "Se você não receber o e-mail nos próximos minutos entre em contato para solucionar o problema";
+            if (this.state.info && this.state.info.phone) {
+                contact += " por meio do número " + this.state.info.phone;
+                if (this.state.info.email) {
+                    contact += " ou";
+                }
+            }
+            if (this.state.info && this.state.info.email) {
+                contact += " pelo e-mail " + this.state.info.email;
+            }
+            contact += ".";
             content = (
-                <div >
+                <div>
                     <p>Cadastro efetuado com sucesso.</p>
                     <p>O seu código de acesso foi enviado para o e-mail cadastrado.</p>
                     <p className='soft'>
                         O código de acesso é pessoal e intransferível.
                         Não deixe que outras pessoas tenham acesso a ele.
+                    </p>
+                    <p className='soft'>
+                        {contact}
                     </p>
                     <div>
                         <p>
