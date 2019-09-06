@@ -4,13 +4,13 @@ exports.accessCodePlain = (name, accessCode) => {
         name = names[0] + ' ' + names[1];
     }
     return (
-        "Olá " + name + "." +
+        "Olá " + name + ". " +
         "Seu cadastro no Access Code App foi efetuado com sucesso. " +
         "O seu código de acesso é: " +
         accessCode + ". " +
         "Atenção: O código de acesso é pessoal e intransferível. Não deixe que outras pessoas tenham acesso a ele. " +
         "Utilize o seu código de acesso para acessar o sistema pelo link: " +
-        "https://access-code-app.web.app/auth"
+        "https://access-code-app.web.app"
     )
 }
 exports.accessCodeHtml = (name, accessCode) => {
@@ -31,7 +31,7 @@ exports.accessCodeHtml = (name, accessCode) => {
                 "</p>" +
                 "<p>Utilize o seu código de acesso para acessar o sistema pelo link abaixo:</p>" +
                 "<p>" +
-                "<a href='https://access-code-app.web.app/auth'>https://access-code-app.web.app/auth</a>" +
+                "<a href='https://access-code-app.web.app'>https://access-code-app.web.app</a>" +
                 "</p>" +
             "</div>" +
         "</div>"

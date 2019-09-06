@@ -109,7 +109,7 @@ class Register extends React.Component {
             assunto: 'Cadastro efetuado com sucesso.',
             destinatarios: this.state.email,
             corpo: mailPatterns.accessCodePlain(user.name, user.accesscode),
-            corpoHtml: mailPatterns.accessCodePlain(user.name, user.accesscode)
+            corpoHtml: mailPatterns.accessCodeHtml(user.name, user.accesscode)
         }
         axios.post('https://us-central1-access-code-app.cloudfunctions.net/sendMail', data)
             .then(() => { })
