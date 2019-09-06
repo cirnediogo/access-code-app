@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 
 import Register from './containers/Register/Register';
-import Auth from './components/Auth/Auth';
+import Auth from './containers/Auth/Auth';
 
 class App extends Component {
 

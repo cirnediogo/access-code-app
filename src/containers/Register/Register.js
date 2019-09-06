@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Link } from "react-router-dom";
 import Button from 'muicss/lib/react/button';
 
@@ -9,7 +9,7 @@ import axios from '../../axios';
 import * as mailPatterns from './mailPatterns.js';
 import '../../styles/layout.css';
 
-class Register extends Component {
+class Register extends React.Component {
 
     state = {
         name: '',
@@ -128,6 +128,8 @@ class Register extends Component {
     }
 
     onInputChange = (object, value) => {
+        console.log('object', object);
+        console.log('value', value);
         this.setState({
             [object]: value
         })
