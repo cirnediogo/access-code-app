@@ -6,6 +6,7 @@ import Input from '../../components/UI/Input/Input';
 import { getAccessCode } from './AccessCode';
 import axios from '../../axios';
 
+import * as mailPatterns from './mailPatterns.js';
 import '../../styles/layout.css';
 
 class Register extends Component {
@@ -79,7 +80,7 @@ class Register extends Component {
                 }
                 axios.post('/accounts.json', user)
                     .then(() => {
-                        this.sendMail();
+                        this.sendMail(user);
                         this.setState({
                             registered: true,
                             loading: false
@@ -103,16 +104,16 @@ class Register extends Component {
             .catch(err => { this.requestError(err) })
     }
 
-    sendMail() {
+    sendMail(user) {
         const data = {
             assunto: 'Cadastro efetuado com sucesso.',
             destinatarios: this.state.email,
-            corpo: 'Este é um testeeee.',
-            corpoHtml: '<h1>Este é um teste</h1>'
+            corpo: mailPatterns.accessCodePlain(user.name, user.accesscode),
+            corpoHtml: mailPatterns.accessCodePlain(user.name, user.accesscode)
         }
         axios.post('https://us-central1-access-code-app.cloudfunctions.net/sendMail', data)
-            .then(() => {})
-            .catch(() => {})
+            .then(() => { })
+            .catch(() => { })
     }
 
     requestError(error) {

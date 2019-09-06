@@ -35,3 +35,9 @@ exports.sendMail = functions.https.onRequest((req, res) => {
         });
     });
 });
+
+/*
+ ***********************************************************
+ *** Tutorial at: https://medium.com/@adsonrocha/como-enviar-e-mails-usando-cloud-functions-do-firebase-com-o-nodemailer-5c8bf6d9f8e8
+ ***********************************************************
+ */
