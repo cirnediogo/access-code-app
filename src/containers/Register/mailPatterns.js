@@ -10,7 +10,7 @@ exports.accessCodePlain = (name, accessCode) => {
         accessCode + ". " +
         "Atenção: O código de acesso é pessoal e intransferível. Não deixe que outras pessoas tenham acesso a ele. " +
         "Utilize o seu código de acesso para acessar o sistema pelo link: " +
-        "https://access-code-app.web.app"
+        "https://access-code-app.web.app/auth"
     )
 }
 exports.accessCodeHtml = (name, accessCode) => {
@@ -31,7 +31,7 @@ exports.accessCodeHtml = (name, accessCode) => {
                 "</p>" +
                 "<p>Utilize o seu código de acesso para acessar o sistema pelo link abaixo:</p>" +
                 "<p>" +
-                "<a href='https://access-code-app.web.app'>https://access-code-app.web.app</a>" +
+                "<a href='https://access-code-app.web.app/auth'>https://access-code-app.web.app/auth</a>" +
                 "</p>" +
             "</div>" +
         "</div>"
